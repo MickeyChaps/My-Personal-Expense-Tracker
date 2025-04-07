@@ -1,55 +1,55 @@
-#Importing all important libraries and functions(from other files as well)
+#Importing all important libraries and functions(from other files as well
 
-import json
+import sqlite3
 from menuz import *
-#from adding_expenses_function import *
+from expense_tracker_functions import Functions
 
-#Our Global variables
-name = ""
-#expense = ""
-age = ""
-phone = ""
+def main():
+    #we do this because other programs are importing the same things as the main program
+    functions = Functions()
 
-#Opening and loading our JSON file in the "Read" mode
-try:
-    with open("expenses.json", "r") as json_file:
-        data = json.load(json_file)
-        #Helps to load the file properly
-        if not isinstance(data, dict):
-            data = []
-except (FileNotFoundError, json.decoder.JSONDecodeError):
-    #If the file is not found, generate a new JSON file with a dictionary "data"
-    data = []
-    #expenses = []
 
-print("Welcome to the Personal Expense Tracker")
-print("=================================================================================")
+    #Connect to the database
+    conn = sqlite3.connect("expense_tracker.db")
+    cur = conn.cursor()
 
-#Using the Login menu
-first_message =  menu1("1")
+    cur.executescript('''
+        CREATE TABLE IF NOT EXISTS Users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            email EMAIL NOT NULL
+        );
+        
+        CREATE TABLE IF NOT EXISTS Expenses (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            expense_name TEXT NOT NULL,
+            amount INTEGER NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES Users (id)
+        );
+        
+        CREATE TABLE IF NOT EXISTS Userlogin(
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        user_id INTEGER NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES Users (id)
+        );
+    ''')
 
-#Registration of new user
-if first_message == "1":
-    print("Enter your:")
-    name = input("1. Full Name: ")
-    age = input("2. Your age: ")
-    phone = input("3. Phone Number: ")
+    conn.commit()
+    conn.close()
 
-    #Checking whether the User exists using the dictionary Key
-    if any(entry["name"].lower() == name.lower() for entry in data):
-        print("User already exists!!!!")
-    else:
-        new_entry = {"name": name,
-                     "age": age,
-                     "phone": phone,
-                     }
-        data.append(new_entry)
-        print("Account Successfully Registered")
 
-        with open("expenses.json", "w") as file:
-            json.dump(data, file, indent=4)
-        #Using the Operations menu
-        second_message = menu2("2")
+    print("Welcome to the Personal Expense Tracker")
+    print("=================================================================================")
+
+    #Using the Login menu
+    first_message =  menu1()
+
+
+
+main()
 
 
 
